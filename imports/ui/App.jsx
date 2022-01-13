@@ -1,4 +1,5 @@
 import React, {useEffect, useState} from 'react';
+import { Buffer } from "buffer";
 import { Tracker } from 'meteor/tracker';
 import { Accounts } from 'meteor/accounts-base';
 
@@ -7,7 +8,10 @@ export const App = () => {
   const [user, setUser] = useState(null);
   const [qrCode, setQrCode] = useState(null);
   const [code, setCode] = useState(null);
-  const [validateCode, setHandleValidateCode] = useState(null);
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [shouldAskCode, setShouldAskCode] = useState(false);
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
     Tracker.autorun(() => {
@@ -15,18 +19,11 @@ export const App = () => {
     });
   }, [])
 
-  const handleValidateCode = () => {
-    try {
-      if (validateCode) {
-        validateCode(code);
-      }
-    } catch (err) {
-      console.error('Error verifying code', err);
-    }
-  }
   const handleValidateCodeFromQr = () => {
     try {
       Accounts.enableUser2fa(code);
+      setQrCode(null);
+      setMessage("full protection activated");
     } catch (err) {
       console.error('Error verifying code from qr', err);
     }
@@ -40,13 +37,16 @@ export const App = () => {
         <div>
           {JSON.stringify(user)}
           <button
-            onClick={() => Meteor.logout()}
+            onClick={() => {
+              Meteor.logout();
+              setMessage("");
+            }}
           >
             Get me out of here
           </button>
           <button
             onClick={() => {
-              Accounts.generateSvgCode((err, svg) => {
+              Accounts.generateSvgCodeAndSaveSecret((err, svg) => {
                 if (err) {
                   console.error("Error trying to log in", err);
                   return;
@@ -57,24 +57,47 @@ export const App = () => {
           >
             get me a code
           </button>
+          <button
+            onClick={() => {
+              Accounts.disableUser2fa()
+            }}
+          >
+            disable 2fa
+          </button>
         </div> :
         <div>
-        no use at all my man
+          <input onChange={({target: {value}}) => setUsername(value)}/>
+          <input onChange={({target: {value}}) => setPassword(value)} type="password"/>
+
       <button onClick={() => {
-        Meteor.loginWithPassword("aoba", "123", (error, validateCodeAndAuthenticate) => {
-          if (error) {
-            console.error("Error trying to log in", error);
+        Accounts.has2FAEnabled(username, (err, isEnabled) => {
+          if (err) {
+            console.error("Error verifying if user has 2fa enabled", err);
             return;
           }
 
-          setHandleValidateCode(() => validateCodeAndAuthenticate);
-        })
+          if (isEnabled) {
+            setShouldAskCode(true);
+            return;
+          }
+          Meteor.loginWithPassword(username, password, error => {
+            if (error) {
+              console.error("Error trying to log in (user without 2fa)", error);
+            }
+          });
+        });
       }
       }>login?</button>
 
-          {validateCode && <div>
+          {shouldAskCode && <div>
             <input onChange={({target: {value}}) => setCode(value)}/>
-            <button onClick={handleValidateCode}>validate</button>
+            <button onClick={() => {
+              Meteor.loginWithPassword(username, password, code,error => {
+                if (error) {
+                  console.error("Error trying to log in (user WITH 2fa)", error);
+                }
+              })}
+            }>validate</button>
           </div>}
         <button onClick={() => {
           Accounts.createUser({
@@ -104,6 +127,8 @@ export const App = () => {
         <button onClick={handleValidateCodeFromQr}>validate</button>
       </div>
       }
+
+      {message && <div>{message}</div>}
     </div>
   );
 };
