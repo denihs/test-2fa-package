@@ -46,7 +46,7 @@ export const App = () => {
           </button>
           <button
             onClick={() => {
-              Accounts.generateSvgCodeAndSaveSecret((err, svg) => {
+              Accounts.generate2faActivationQrCode((err, svg) => {
                 if (err) {
                   console.error("Error trying to log in", err);
                   return;
@@ -70,7 +70,7 @@ export const App = () => {
           <input onChange={({target: {value}}) => setPassword(value)} type="password"/>
 
       <button onClick={() => {
-        Accounts.has2FAEnabled(username, (err, isEnabled) => {
+        Accounts.has2faEnabled(username, (err, isEnabled) => {
           if (err) {
             console.error("Error verifying if user has 2fa enabled", err);
             return;
@@ -92,7 +92,7 @@ export const App = () => {
           {shouldAskCode && <div>
             <input onChange={({target: {value}}) => setCode(value)}/>
             <button onClick={() => {
-              Meteor.loginWithPassword(username, password, code,error => {
+              Meteor.loginWithPasswordAnd2faCode(username, password, code,error => {
                 if (error) {
                   console.error("Error trying to log in (user WITH 2fa)", error);
                 }
