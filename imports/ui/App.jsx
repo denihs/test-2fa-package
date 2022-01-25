@@ -93,25 +93,23 @@ export const App = () => {
       }>login?</button>
 
       <button onClick={() => {
-        Accounts.has2faEnabled(username, (err, isEnabled) => {
+        Accounts.has2faEnabled("aoba", (err, isEnabled) => {
           if (err) {
             console.error("Error verifying if user has 2fa enabled", err);
             return;
           }
 
-          console.log('has2faEnabled', {username, isEnabled});
-
-          if (isEnabled) {
-            Accounts.requestLoginTokenForUser({selector: "denilsonh2014@gmail.com"}, (err) => {
+            Accounts.requestLoginTokenForUser({selector: "someemail@example.com"}, (err) => {
               if (err) {
                 console.error("Error verifying if user has 2fa enabled", err);
                 return;
               }
-              setShouldAskCodeWithoutPassAndToken(true);
+              if (isEnabled) {
+                setShouldAskCodeWithoutPassAndToken(true);
+                return;
+              }
+              setShouldAskCodeWithoutPass(true);
             });
-            return;
-          }
-          setShouldAskCodeWithoutPass(true);
         });
 
       }
@@ -128,10 +126,10 @@ export const App = () => {
             }>validate</button>
           </div>}
           {(shouldAskCodeWithoutPass || shouldAskCodeWithoutPassAndToken) && <div>
-            <input onChange={({target: {value}}) => setToken(value)}/>
+            <input onChange={({target: {value}}) => setToken(value)} placeholder="token"/>
             {shouldAskCodeWithoutPassAndToken ?
               <div>
-                <input onChange={({target: {value}}) => setCode(value)}/>
+                <input onChange={({target: {value}}) => setCode(value)}  placeholder="2fa code"/>
 
                 <button onClick={() => {
                   Meteor.passwordlessLoginWithTokenAnd2faCode("denilsonh2014@gmail.com", token, code,error => {
