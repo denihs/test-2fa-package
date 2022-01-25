@@ -1,6 +1,7 @@
 accounts-2fa@1.0.0
 accounts-base@2.2.0
 accounts-password@2.2.0
+accounts-passwordless@2.0.0
 allow-deny@1.1.0
 autopublish@1.0.7
 autoupdate@1.8.0
