@@ -1,4 +1,89 @@
 body {
-  padding: 10px;
   font-family: sans-serif;
+  background-color: #3e4444;
+  color: white;
+  margin: 0;
+}
+
+input {
+  border-radius: 10px;
+  padding: 10px;
+  border: none;
+  margin: 8px 8px 8px 0;
+}
+
+span {
+  display: block;
+  font-size: 12px;
+  color: #878f99;
+  margin: 8px 0;
+}
+
+button {
+  background-color: #80ced6;
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.container {
+  max-width: 500px;
+  margin: 20px auto;
+}
+
+.header {
+  background-image: url('images/hacker.jpeg');
+  height: 105px;
+  object-fit: cover;
+  background-repeat: no-repeat;
+  background-size: 100%;
+  border-radius: 20px 20px 0 0;
+  display: flex;
+}
+
+.qr-code-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.qr-code-fields {
+  margin-top: 8px;
+}
+
+.toggle-button-container {
+  margin: 16px 0;
+  display: flex;
+  justify-content: center;
+}
+
+.toggle-button {
+  background-color: #feb236;
+}
+
+.error {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  background-color: #e6e2d3;
+  margin-top: 10px;
+  border-radius: 10px;
+  padding: 10px;
+  color: #d64161;
+}
+
+.container-loading {
+  width: 100vw;
+  height: 100vh;
+  background-color: black;
+  justify-content: center;
+  display: flex;
+}
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
