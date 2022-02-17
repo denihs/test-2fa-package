@@ -55,15 +55,17 @@ export const App = () => {
   }, []);
 
   useEffect(() => {
-    Accounts.has2faEnabled(USER_DATA.username, (err, isEnabled) => {
-      if (err) {
-        setIs2faEnabled(false);
-        console.error('Error verifying if user has 2fa enabled', err);
-        handleError(err.reason);
-        return;
-      }
-      setIs2faEnabled(isEnabled);
-    });
+    if (user) {
+      Accounts.has2faEnabled(USER_DATA.username, (err, isEnabled) => {
+        if (err) {
+          setIs2faEnabled(false);
+          console.error('Error verifying if user has 2fa enabled', err);
+          handleError(err.reason);
+          return;
+        }
+        setIs2faEnabled(isEnabled);
+      });
+    }
   }, [user, message]);
 
   const handleValidateCodeFromQr = () => {
@@ -243,12 +245,12 @@ export const App = () => {
             {!shouldAskCode && (
               <button
                 onClick={() => {
-                  if (is2faEnabled) {
-                    setShouldAskCode(true);
-                    return;
-                  }
                   Meteor.loginWithPassword(username, password, error => {
                     if (error) {
+                      if (error.error === 'no-2fa-code') {
+                        setShouldAskCode(true);
+                        return;
+                      }
                       console.error(
                         'Error trying to log in (user without 2fa)',
                         error
@@ -318,10 +320,6 @@ export const App = () => {
                       handleError(err.reason);
                       return;
                     }
-                    if (is2faEnabled) {
-                      setShouldAskCodeWithoutPassAndToken(true);
-                      return;
-                    }
                     setShouldAskCodeWithoutPass(true);
                   }
                 );
@@ -375,6 +373,10 @@ export const App = () => {
                       token,
                       error => {
                         if (error) {
+                          if (error.error === 'no-2fa-code') {
+                            setShouldAskCodeWithoutPassAndToken(true);
+                            return;
+                          }
                           console.error(
                             'Error trying to log in (passwordlessLoginWithToken)',
                             error
